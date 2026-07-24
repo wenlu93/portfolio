@@ -32,7 +32,21 @@
     opts = opts || {};
     const tier = opts.tier || window.__tier || 'value';
     const w = opts.w || 900;
-    const U = id => (window.__resources && window.__resources['ph_'+id]) || `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+    const U = id => {
+      const resources = window.__resources || {};
+      const primary = resources['ph_'+id];
+      if (primary) return primary;
+      let mobileHost = false;
+      try {
+        mobileHost = window.parent !== window ? window.parent.innerWidth <= 700 : window.innerWidth <= 700;
+      } catch (e) {
+        mobileHost = window.innerWidth <= 700;
+      }
+      if (mobileHost) {
+        return resources['ag_photo-'+id] || resources['svc_'+id] || `deals-assets/images/mobile-unsplash/${id}.jpg`;
+      }
+      return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+    };
 
     /* —— 已核对内容的高清图集 —— */
     const B = {

@@ -3421,6 +3421,7 @@ a { color: inherit; }
 .kb-shot { scroll-snap-align: start; display: flex; flex-direction: column; gap: 8px; cursor: zoom-in; margin: 0; }
 .kb-shot .ph { border: 1px solid var(--line-strong); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: var(--shadow-card); transition: transform .18s ease, box-shadow .18s ease; }
 .kb-shot:hover .ph { transform: translateY(-3px); box-shadow: var(--shadow-pop); }
+.kb-shot picture { display: block; width: 100%; }
 .kb-shot img { display: block; width: 100%; height: auto; }
 .kb-shot .cap { font-family: var(--font-mono); font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
 .kb-shot .cap b { color: var(--accent-ink); font-weight: 700; }
@@ -4212,6 +4213,15 @@ a { color: inherit; }
   #project-3 .con-body { padding: 12px !important; }
   #project-3 .con-scenes { grid-template-columns: 1fr !important; }
 }
+@media (max-width: 700px) {
+  /* Mobile must never depend on an observer callback before content is visible. */
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Put the interactive demo before the long control panel on narrow screens. */
+  #project-3 .device-wrap { order: -1; }
+}
 </style>
 </head>
 <body>
@@ -4271,26 +4281,26 @@ a { color: inherit; }
 </div>
 <div class="p1-summary-strip">
 <figure class="kb-shot" data-cap="图1 · 每日摘要推送——多源多模态数据自动汇总，一条消息送达">
-<div class="ph"><img alt="关注内容汇总截图" loading="lazy" src="assets/images/kbfig-asset-01.jpg"/></div>
+<div class="ph"><picture><source media="(max-width: 700px)" srcset="assets/images/mobile/kbfig-asset-01.webp" type="image/webp"/><img alt="关注内容汇总截图" decoding="async" loading="eager" src="assets/images/kbfig-asset-01.jpg"/></picture></div>
 </figure>
 <figure class="kb-shot" data-cap="图3 · 与「我的当前项目」相关的推送,逐条给出命中理由">
-<div class="ph"><img alt="项目相关命中截图" loading="lazy" src="assets/images/kbfig-asset-03.jpg"/></div>
+<div class="ph"><picture><source media="(max-width: 700px)" srcset="assets/images/mobile/kbfig-asset-03.webp" type="image/webp"/><img alt="项目相关命中截图" decoding="async" loading="eager" src="assets/images/kbfig-asset-03.jpg"/></picture></div>
 </figure>
 <figure class="kb-shot" data-cap="图4 · 与「我的兴趣」相关:GitHub 雷达 / YouTube 灰度预览">
-<div class="ph"><img alt="兴趣相关匹配截图" loading="lazy" src="assets/images/kbfig-asset-04.png"/></div>
+<div class="ph"><picture><source media="(max-width: 700px)" srcset="assets/images/mobile/kbfig-asset-04.webp" type="image/webp"/><img alt="兴趣相关匹配截图" decoding="async" loading="eager" src="assets/images/kbfig-asset-04.png"/></picture></div>
 </figure>
 </div>
 </div>
 <div class="kb-stage p1-shot-card">
 <div class="kb-sth"><b>查看原文</b><i>一键跳转自动生成的逐字稿文档</i></div>
 <figure class="kb-shot" data-cap="图2 · 推送对应的摘要 / 逐字稿文档,一键跳转阅读原文">
-<div class="ph"><img alt="查看原文截图" loading="lazy" src="assets/images/kbfig-asset-02.jpg"/></div>
+<div class="ph"><picture><source media="(max-width: 700px)" srcset="assets/images/mobile/kbfig-asset-02.webp" type="image/webp"/><img alt="查看原文截图" decoding="async" loading="eager" src="assets/images/kbfig-asset-02.jpg"/></picture></div>
 </figure>
 </div>
 <div class="kb-stage p1-shot-card">
 <div class="kb-sth"><b>轻量反馈</b><i>“我”点赞 / 点踩 / 评论</i></div>
 <figure class="kb-shot" data-cap="图5 · 我在文档划线评论,判断自动沉淀回知识库">
-<div class="ph"><img alt="轻量反馈截图" loading="lazy" src="assets/images/kbfig-asset-05.jpg"/></div>
+<div class="ph"><picture><source media="(max-width: 700px)" srcset="assets/images/mobile/kbfig-asset-05.webp" type="image/webp"/><img alt="轻量反馈截图" decoding="async" loading="eager" src="assets/images/kbfig-asset-05.jpg"/></picture></div>
 </figure>
 </div>
 </div>
@@ -4301,13 +4311,13 @@ a { color: inherit; }
 <div class="kb-stage p1-shot-card">
 <div class="kb-sth"><b>向 Agent 提问</b><i>@Bot 基于个人知识库回答,逐条带出处</i></div>
 <figure class="kb-shot" data-cap="图7 · 向 Agent 提问,获得基于个人知识库、带出处的回答">
-<div class="ph"><img alt="向 Agent 提问截图" loading="lazy" src="assets/images/kbfig-asset-07.jpg"/></div>
+<div class="ph"><picture><source media="(max-width: 700px)" srcset="assets/images/mobile/kbfig-asset-07.webp" type="image/webp"/><img alt="向 Agent 提问截图" decoding="async" loading="eager" src="assets/images/kbfig-asset-07.jpg"/></picture></div>
 </figure>
 </div>
 <div class="kb-stage p1-shot-card">
 <div class="kb-sth"><b>反馈自动回写</b><i>“人”的判断回流知识库，Agent 持续编译升级</i></div>
 <figure class="kb-shot" data-cap="图6 · Agent 编译后的知识文档:归纳论点 + 逐条出处引用">
-<div class="ph"><img alt="反馈自动回写截图" loading="lazy" src="assets/images/kbfig-asset-06.jpg"/></div>
+<div class="ph"><picture><source media="(max-width: 700px)" srcset="assets/images/mobile/kbfig-asset-06.webp" type="image/webp"/><img alt="反馈自动回写截图" decoding="async" loading="eager" src="assets/images/kbfig-asset-06.jpg"/></picture></div>
 </figure>
 </div>
 </div>
@@ -4542,7 +4552,6 @@ a { color: inherit; }
         tuneDealImagesForAWhile();
       }, { once:true });
       d.src = dealsUrl;
-      setTimeout(function(){ markLoaded(d); tuneDealImagesForAWhile(); }, 4500);
     }
 
     // The C-end demo is Project 3; start it shortly before the section is visible.
@@ -4577,7 +4586,6 @@ a { color: inherit; }
       p.dataset.loaded = '1';
       p.addEventListener('load', function(){ markLoaded(p); }, { once:true });
       p.src = portalUrl;
-      setTimeout(function(){ markLoaded(p); }, 5000);
       if (p2 && p2.dataset.loaded !== '1') {
         p2.dataset.loaded = '1';
         p2.addEventListener('load', function(){
@@ -4595,7 +4603,6 @@ a { color: inherit; }
           });
         }, { once:true });
         p2.src = portalUrl + '#list';
-        setTimeout(function(){ markLoaded(p2); }, 5000);
       }
     }
 
@@ -5335,10 +5342,15 @@ a { color: inherit; }
 </script>
 <script>
   // scroll reveal
-  const io = new IntersectionObserver((es) => {
-    es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    revealEls.forEach((el) => io.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add('in'));
+  }
 
   // scrollspy: highlight active project in top nav
   const navLinks = [...document.querySelectorAll('.topnav .navlink')];
@@ -5473,7 +5485,7 @@ a { color: inherit; }
     document.querySelectorAll('.kb-shot').forEach(function(f){
       f.addEventListener('click', function(){
         var img = f.querySelector('img');
-        im.src = img.src; im.alt = img.alt;
+        im.src = img.currentSrc || img.src; im.alt = img.alt;
         cp.textContent = f.getAttribute('data-cap') || '';
         lb.classList.add('on');
         document.body.style.overflow = 'hidden';
