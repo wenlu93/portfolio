@@ -5,7 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>个人作品集 · Vibe Coding Works</title>
 <link href="data:," rel="icon"/>
-<script>if(window.matchMedia&&window.matchMedia('(max-width:700px)').matches){document.documentElement.classList.add('mobile-fast-fonts')}</script>
+<script>if(window.matchMedia&&window.matchMedia('(max-width:700px)').matches){document.documentElement.classList.add('mobile-fast-fonts');window.addEventListener('load',function(){setTimeout(function(){document.documentElement.classList.remove('mobile-fast-fonts')},12000)},{once:true})}</script>
 <style>@media(max-width:700px){html.mobile-fast-fonts{--font-display:system-ui,sans-serif!important;--font-body:system-ui,sans-serif!important;--font-mono:ui-monospace,monospace!important}}</style>
 <style>/* cyrillic-ext */
 
@@ -2634,63 +2634,14 @@ a { color: inherit; }
     var portalExternal = 'https://wenlu93.github.io/campaign-info-portal/?v=acf0065';
     var narrowScreen = !!(window.matchMedia && window.matchMedia('(max-width: 700px)').matches);
 
-    // GitHub Pages becomes much slower when these large images start together on mobile.
-    // Warm them one at a time after the first paint; the visible lazy images reuse the response.
+    // Start the four below-the-fold Project 1 images early on phones only.
+    // Versioned URLs avoid stale Safari/CDN cache entries; desktop keeps its original lazy behavior.
     if (narrowScreen) {
-      var mobileImageQueue = [
-        'assets/images/mobile/kbfig-asset-02.webp?v=portfolio-images-20260725',
-        'assets/images/mobile/kbfig-asset-05.webp?v=portfolio-images-20260725',
-        'assets/images/mobile/kbfig-asset-07.webp?v=portfolio-images-20260725',
-        'assets/images/mobile/kbfig-asset-06.webp?v=portfolio-images-20260725'
-      ];
-      var mobileImageIndex = 0;
-      function warmMobileFonts(){
-        if (!document.fonts || !document.fonts.load) return;
-        var fontQueue = [
-          ['400 16px "IBM Plex Sans"', 'Aa01'],
-          ['400 16px "JetBrains Mono"', 'Aa01'],
-          ['400 16px "Space Grotesk"', 'Aa01']
-        ];
-        var seenChars = {};
-        Array.from(document.body.textContent || '').forEach(function(char){
-          if (char.charCodeAt(0) > 127 && !seenChars[char]) {
-            seenChars[char] = true;
-            fontQueue.push(['400 16px "Noto Sans SC"', char]);
-          }
-        });
-        var fontIndex = 0;
-        function warmNextMobileFont(){
-          if (fontIndex >= fontQueue.length) {
-            document.documentElement.classList.remove('mobile-fast-fonts');
-            return;
-          }
-          if (document.hidden) {
-            setTimeout(warmNextMobileFont, 250);
-            return;
-          }
-          var item = fontQueue[fontIndex];
-          document.fonts.load(item[0], item[1]).catch(function(){}).then(function(){
-            fontIndex += 1;
-            setTimeout(warmNextMobileFont, 0);
-          });
-        }
-        warmNextMobileFont();
-      }
-      function warmNextMobileImage(){
-        if (mobileImageIndex >= mobileImageQueue.length) {
-          warmMobileFonts();
-          return;
-        }
-        var image = new Image();
-        image.decoding = 'async';
-        try { image.fetchPriority = 'low'; } catch(e) {}
-        image.onload = image.onerror = function(){
-          mobileImageIndex += 1;
-          warmNextMobileImage();
-        };
-        image.src = mobileImageQueue[mobileImageIndex];
-      }
-      setTimeout(warmNextMobileImage, 300);
+      document.querySelectorAll('#project-1 .kb-shot img[loading="lazy"]').forEach(function(img){
+        img.loading = 'eager';
+        img.decoding = 'async';
+        try { img.fetchPriority = 'high'; } catch(e) {}
+      });
     }
 
     function markLoaded(frameEl) {
@@ -2906,18 +2857,16 @@ a { color: inherit; }
         prefetchDemo(portalExternal);
       }, { timeout: 4000 });
     }
-    if (!narrowScreen) {
-      if (document.readyState === 'complete') {
+    if (document.readyState === 'complete') {
+      setTimeout(prefetchExternalDemosLater, 6000);
+    } else {
+      window.addEventListener('load', function(){
         setTimeout(prefetchExternalDemosLater, 6000);
-      } else {
-        window.addEventListener('load', function(){
-          setTimeout(prefetchExternalDemosLater, 6000);
-        }, { once:true });
-      }
+      }, { once:true });
     }
 
     [dealsOpen, portalOpen].forEach(function(a){
-      if (!a || narrowScreen) return;
+      if (!a) return;
       var url = a.href;
       ['pointerenter','focus','touchstart'].forEach(function(evt){
         a.addEventListener(evt, function(){ warmExternal(url); }, { once:true, passive:true });
