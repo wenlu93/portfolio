@@ -2620,18 +2620,18 @@ a { color: inherit; }
 </section>
 </main>
 <script>
-  // bind iframe demos + performance hints
+  // bind iframe demos
   (function(){
-    var r = (window.__resources)||{};
     var d = document.getElementById('deals-frame');
     var p = document.getElementById('portal-frame');
     var p2 = document.getElementById('portal-frame-2');
 
-    // Embedded demos use bundled resources; external buttons always point to GitHub Pages.
-    var dealsUrl = r.dealsDemo || 'demos/deals-channel.html?v=portfolio-ready-20260725';
-    var portalUrl = r.portalDemo || 'demos/campaign-portal.html?v=portfolio-ready-20260725';
+    // The embedded demos and new-tab buttons share the exact same URLs so Safari
+    // can reuse the HTML, scripts and image cache instead of downloading a copy.
     var dealsExternal = 'https://wenlu93.github.io/deals-channel/?v=92efb35';
     var portalExternal = 'https://wenlu93.github.io/campaign-info-portal/?v=acf0065';
+    var dealsUrl = dealsExternal;
+    var portalUrl = portalExternal;
     var narrowScreen = !!(window.matchMedia && window.matchMedia('(max-width: 700px)').matches);
 
     // The fourth image is inline. Start only the final three network images early on phones,
@@ -2678,7 +2678,7 @@ a { color: inherit; }
     }
 
     function tuneDealImages() {
-      // Same-origin bundled iframe can usually be accessed; if not, fail silently.
+      // Same-origin iframe can usually be accessed; if not, fail silently.
       if (!d || !d.contentDocument) return;
       try {
         var imgs = d.contentDocument.querySelectorAll('img');
@@ -2715,9 +2715,9 @@ a { color: inherit; }
       }, tuneDealImagesForAWhile);
     }
 
-    // The C-end demo is Project 3; start it shortly before the section is visible.
+    // Prepare Project 3 early on phones; its response is also the new-tab cache.
     if (d) {
-      if (location.hash === '#project-3') {
+      if (narrowScreen || location.hash === '#project-3') {
         loadDeals();
       } else if ('IntersectionObserver' in window) {
         var project3 = document.getElementById('project-3') || d;
@@ -2788,9 +2788,11 @@ a { color: inherit; }
       if (!narrowScreen) loadPortal2();
     }
 
-    // The B-end portal is Project 2; load it when close to the viewport.
+    // Prepare Project 2 early on phones; desktop keeps proximity-based loading.
     if (p) {
-      if ('IntersectionObserver' in window) {
+      if (narrowScreen) {
+        loadPortal();
+      } else if ('IntersectionObserver' in window) {
         var project2 = document.getElementById('project-2') || p;
         var ioPortal = new IntersectionObserver(function(entries){
           entries.forEach(function(entry){
@@ -2825,84 +2827,6 @@ a { color: inherit; }
     var portalOpen = document.querySelector('#project-2 .btns a.btn.primary');
     if (dealsOpen) dealsOpen.href = dealsExternal;
     if (portalOpen) portalOpen.href = portalExternal;
-
-    function addHint(rel, href, asValue) {
-      if (!href || document.querySelector('link[rel="' + rel + '"][href="' + href + '"]')) return;
-      var link = document.createElement('link');
-      link.rel = rel;
-      link.href = href;
-      if (asValue) link.as = asValue;
-      document.head.appendChild(link);
-    }
-
-    function prefetchDemo(url) {
-      addHint('prefetch', url, 'document');
-    }
-
-    function warmExternal(url) {
-      if (dealsCacheAbort) {
-        dealsCacheAbort.abort();
-        dealsCacheAbort = null;
-      }
-      prefetchDemo(url);
-      // Hidden iframe only on user intent; helps demo-new-tab open faster without blocking initial page.
-      if (document.querySelector('iframe[data-warm-url="' + url + '"]')) return;
-      var f = document.createElement('iframe');
-      f.setAttribute('data-warm-url', url);
-      f.src = url;
-      f.loading = 'eager';
-      f.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:-9999px;border:0;';
-      document.body.appendChild(f);
-    }
-
-    // Prefetch only after the initial page and critical resources have settled.
-    function prefetchExternalDemosLater(){
-      var idle = window.requestIdleCallback || function(cb){ return setTimeout(cb, 1600); };
-      idle(function(){
-        prefetchDemo(dealsExternal);
-        prefetchDemo(portalExternal);
-      }, { timeout: 4000 });
-    }
-
-    // Cache only Project 3's bundled HTML after the page structure is ready.
-    // The request stays low priority and is cancelled if an external demo is opened.
-    var dealsCacheAbort = null;
-    function cacheDealsDocumentLater(){
-      if (!narrowScreen || !window.fetch || !d || d.dataset.loaded === '1') return;
-      setTimeout(function(){
-        if (d.dataset.loaded === '1') return;
-        var options = { cache: 'force-cache', priority: 'low' };
-        if (window.AbortController) {
-          dealsCacheAbort = new AbortController();
-          options.signal = dealsCacheAbort.signal;
-        }
-        fetch(dealsUrl, options).then(function(){
-          dealsCacheAbort = null;
-        }, function(){
-          dealsCacheAbort = null;
-        });
-      }, 600);
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', cacheDealsDocumentLater, { once:true });
-    } else {
-      cacheDealsDocumentLater();
-    }
-    if (document.readyState === 'complete') {
-      setTimeout(prefetchExternalDemosLater, 6000);
-    } else {
-      window.addEventListener('load', function(){
-        setTimeout(prefetchExternalDemosLater, 6000);
-      }, { once:true });
-    }
-
-    [dealsOpen, portalOpen].forEach(function(a){
-      if (!a) return;
-      var url = a.href;
-      ['pointerenter','focus','touchstart'].forEach(function(evt){
-        a.addEventListener(evt, function(){ warmExternal(url); }, { once:true, passive:true });
-      });
-    });
   })();
 </script>
 <script>
