@@ -5,10 +5,9 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>个人作品集 · Vibe Coding Works</title>
 <link href="data:," rel="icon"/>
-<link as="image" fetchpriority="high" href="assets/images/mobile/kbfig-asset-02.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
-<link as="image" fetchpriority="high" href="assets/images/mobile/kbfig-asset-05.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
-<link as="image" fetchpriority="high" href="assets/images/mobile/kbfig-asset-07.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
-<link as="image" fetchpriority="high" href="assets/images/mobile/kbfig-asset-06.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
+<link as="image" fetchpriority="low" href="assets/images/mobile/kbfig-asset-05.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
+<link as="image" fetchpriority="low" href="assets/images/mobile/kbfig-asset-07.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
+<link as="image" fetchpriority="low" href="assets/images/mobile/kbfig-asset-06.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
 <script>if(window.matchMedia&&window.matchMedia('(max-width:700px)').matches){document.documentElement.classList.add('mobile-fast-fonts');window.addEventListener('load',function(){setTimeout(function(){document.documentElement.classList.remove('mobile-fast-fonts')},12000)},{once:true})}</script>
 <style>@media(max-width:700px){html.mobile-fast-fonts{--font-display:system-ui,sans-serif!important;--font-body:system-ui,sans-serif!important;--font-mono:ui-monospace,monospace!important}}</style>
 <style>/* cyrillic-ext */
@@ -2702,44 +2701,25 @@ a { color: inherit; }
       }, 320);
     }
 
-    var mobileDealsGestureHandler = null;
     function loadDeals(){
       if (!d || d.dataset.loaded === '1') return;
-      if (mobileDealsGestureHandler) {
-        window.removeEventListener('touchstart', mobileDealsGestureHandler);
-        window.removeEventListener('pointerdown', mobileDealsGestureHandler);
-        mobileDealsGestureHandler = null;
-      }
       d.dataset.loaded = '1';
       d.setAttribute('loading', 'eager');
       d.addEventListener('load', function(){
         markLoaded(d);
         tuneDealImagesForAWhile();
-        cacheExternal(dealsExternal);
       }, { once:true });
       d.src = dealsUrl;
       watchRenderReady(d, function(doc){
         var root = doc.querySelector('#root');
         return !!(root && root.firstElementChild);
-      }, function(){
-        tuneDealImagesForAWhile();
-        cacheExternal(dealsExternal);
-      });
+      }, tuneDealImagesForAWhile);
     }
 
     // The C-end demo is Project 3; start it shortly before the section is visible.
     if (d) {
       if (location.hash === '#project-3') {
         loadDeals();
-      } else if (narrowScreen) {
-        var dealsObserveTarget = d.closest('.device-wrap') || d;
-        mobileDealsGestureHandler = function(event){
-          if (event.target && event.target.closest && event.target.closest('a,button,input,select,textarea')) return;
-          var rect = dealsObserveTarget.getBoundingClientRect();
-          if (rect.top < window.innerHeight + 1200 && rect.bottom > 0) loadDeals();
-        };
-        window.addEventListener('touchstart', mobileDealsGestureHandler, { passive:true });
-        window.addEventListener('pointerdown', mobileDealsGestureHandler, { passive:true });
       } else if ('IntersectionObserver' in window) {
         var project3 = document.getElementById('project-3') || d;
         var ioDeals = new IntersectionObserver(function(entries){
@@ -2749,7 +2729,7 @@ a { color: inherit; }
               ioDeals.disconnect();
             }
           });
-        }, { rootMargin: '1200px 0px' });
+        }, { rootMargin: narrowScreen ? '360px 0px' : '1200px 0px' });
         ioDeals.observe(project3);
       } else {
         setTimeout(loadDeals, narrowScreen ? 8000 : 2600);
@@ -2757,7 +2737,7 @@ a { color: inherit; }
 
       var dealsNav = document.querySelector('a.navlink[href="#project-3"]');
       if (dealsNav) {
-        (narrowScreen ? ['touchstart','click'] : ['pointerenter','focus','touchstart']).forEach(function(evt){
+        ['pointerenter','focus','touchstart'].forEach(function(evt){
           dealsNav.addEventListener(evt, loadDeals, { once:true, passive:true });
         });
       }
@@ -2796,7 +2776,6 @@ a { color: inherit; }
       p.dataset.loaded = '1';
       p.addEventListener('load', function(){
         markLoaded(p);
-        cacheExternal(portalExternal);
         if (narrowScreen) setTimeout(loadPortal2, 0);
       }, { once:true });
       p.setAttribute('loading', 'eager');
@@ -2805,7 +2784,6 @@ a { color: inherit; }
       watchRenderReady(p, function(doc){
         return !!doc.querySelector('#page-digest');
       }, function(){
-        cacheExternal(portalExternal);
         if (narrowScreen) loadPortal2();
       });
       if (!narrowScreen) loadPortal2();
@@ -2862,21 +2840,6 @@ a { color: inherit; }
       addHint('prefetch', url, 'document');
     }
 
-    var externalFetches = {};
-    function cacheExternal(url) {
-      prefetchDemo(url);
-      if (!url || externalFetches[url] || !window.fetch) return;
-      externalFetches[url] = fetch(url, {
-        cache: 'force-cache',
-        credentials: 'same-origin'
-      }).then(function(response){
-        if (!response.ok) throw new Error('external prefetch ' + response.status);
-        return response.arrayBuffer();
-      }).catch(function(){
-        externalFetches[url] = null;
-      });
-    }
-
     function warmExternal(url) {
       prefetchDemo(url);
       // Hidden iframe only on user intent; helps demo-new-tab open faster without blocking initial page.
@@ -2893,8 +2856,8 @@ a { color: inherit; }
     function prefetchExternalDemosLater(){
       var idle = window.requestIdleCallback || function(cb){ return setTimeout(cb, 1600); };
       idle(function(){
-        cacheExternal(dealsExternal);
-        cacheExternal(portalExternal);
+        prefetchDemo(dealsExternal);
+        prefetchDemo(portalExternal);
       }, { timeout: 4000 });
     }
     if (document.readyState === 'complete') {
@@ -2908,11 +2871,8 @@ a { color: inherit; }
     [dealsOpen, portalOpen].forEach(function(a){
       if (!a) return;
       var url = a.href;
-      (narrowScreen ? ['touchstart'] : ['pointerenter','focus','touchstart']).forEach(function(evt){
-        a.addEventListener(evt, function(){
-          if (narrowScreen) cacheExternal(url);
-          else warmExternal(url);
-        }, { once:true, passive:true });
+      ['pointerenter','focus','touchstart'].forEach(function(evt){
+        a.addEventListener(evt, function(){ warmExternal(url); }, { once:true, passive:true });
       });
     });
   })();
