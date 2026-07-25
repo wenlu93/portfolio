@@ -1966,8 +1966,6 @@ a { color: inherit; }
 </style>
 <link crossorigin="" href="https://wenlu93.github.io" rel="preconnect"/>
 <link href="//wenlu93.github.io" rel="dns-prefetch"/>
-<link as="document" fetchpriority="low" href="demos/campaign-portal.html?v=portfolio-prewarm-20260725" media="(max-width: 700px)" rel="preload"/>
-<link as="document" fetchpriority="low" href="demos/deals-channel.html?v=portfolio-prewarm-20260725" media="(max-width: 700px)" rel="preload"/>
 <style id="portfolio-demo-perf-css">
 .device-wrap,
 .browser .frame {
@@ -2630,8 +2628,8 @@ a { color: inherit; }
     var p2 = document.getElementById('portal-frame-2');
 
     // Embedded demos use bundled resources; external buttons always point to GitHub Pages.
-    var dealsUrl = r.dealsDemo || 'demos/deals-channel.html?v=portfolio-prewarm-20260725';
-    var portalUrl = r.portalDemo || 'demos/campaign-portal.html?v=portfolio-prewarm-20260725';
+    var dealsUrl = r.dealsDemo || 'demos/deals-channel.html?v=portfolio-ready-20260725';
+    var portalUrl = r.portalDemo || 'demos/campaign-portal.html?v=portfolio-ready-20260725';
     var dealsExternal = 'https://wenlu93.github.io/deals-channel/?v=92efb35';
     var portalExternal = 'https://wenlu93.github.io/campaign-info-portal/?v=acf0065';
     var narrowScreen = !!(window.matchMedia && window.matchMedia('(max-width: 700px)').matches);
@@ -2717,9 +2715,7 @@ a { color: inherit; }
       }, tuneDealImagesForAWhile);
     }
 
-    // Project 3 starts shortly before its section is visible.
-    // Its HTML is already preloaded at low priority on phones, so running the app here
-    // would only compete with images and a direct new-tab navigation.
+    // The C-end demo is Project 3; start it shortly before the section is visible.
     if (d) {
       if (location.hash === '#project-3') {
         loadDeals();
@@ -2792,7 +2788,7 @@ a { color: inherit; }
       if (!narrowScreen) loadPortal2();
     }
 
-    // Project 2 starts when its section is close to the viewport.
+    // The B-end portal is Project 2; load it when close to the viewport.
     if (p) {
       if ('IntersectionObserver' in window) {
         var project2 = document.getElementById('project-2') || p;
@@ -2844,9 +2840,6 @@ a { color: inherit; }
     }
 
     function warmExternal(url) {
-      // Mobile Safari may start a second document request when the new tab opens.
-      // Let the real navigation own the request instead of warming a hidden copy.
-      if (narrowScreen) return;
       prefetchDemo(url);
       // Hidden iframe only on user intent; helps demo-new-tab open faster without blocking initial page.
       if (document.querySelector('iframe[data-warm-url="' + url + '"]')) return;
@@ -2860,17 +2853,28 @@ a { color: inherit; }
 
     // Prefetch only after the initial page and critical resources have settled.
     function prefetchExternalDemosLater(){
-      if (narrowScreen) return;
       var idle = window.requestIdleCallback || function(cb){ return setTimeout(cb, 1600); };
       idle(function(){
         prefetchDemo(dealsExternal);
         prefetchDemo(portalExternal);
       }, { timeout: 4000 });
     }
+
+    // Cache only Project 3's bundled HTML after the main page has finished loading.
+    // This avoids running the full app in the background while removing its document wait.
+    function cacheDealsDocumentLater(){
+      if (!narrowScreen || !window.fetch || !d || d.dataset.loaded === '1') return;
+      setTimeout(function(){
+        if (d.dataset.loaded === '1') return;
+        fetch(dealsUrl, { cache: 'force-cache', priority: 'low' }).catch(function(){});
+      }, 600);
+    }
     if (document.readyState === 'complete') {
+      cacheDealsDocumentLater();
       setTimeout(prefetchExternalDemosLater, 6000);
     } else {
       window.addEventListener('load', function(){
+        cacheDealsDocumentLater();
         setTimeout(prefetchExternalDemosLater, 6000);
       }, { once:true });
     }
