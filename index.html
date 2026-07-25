@@ -2717,10 +2717,11 @@ a { color: inherit; }
       }, tuneDealImagesForAWhile);
     }
 
-    // On phones, prepare Project 3 in the background as soon as the page is interactive.
-    // Desktop keeps the original proximity-based loading behavior.
+    // Project 3 starts shortly before its section is visible.
+    // Its HTML is already preloaded at low priority on phones, so running the app here
+    // would only compete with images and a direct new-tab navigation.
     if (d) {
-      if (narrowScreen || location.hash === '#project-3') {
+      if (location.hash === '#project-3') {
         loadDeals();
       } else if ('IntersectionObserver' in window) {
         var project3 = document.getElementById('project-3') || d;
@@ -2791,12 +2792,9 @@ a { color: inherit; }
       if (!narrowScreen) loadPortal2();
     }
 
-    // On phones, prepare Project 2 in the background as soon as the page is interactive.
-    // Desktop keeps the original proximity-based loading behavior.
+    // Project 2 starts when its section is close to the viewport.
     if (p) {
-      if (narrowScreen) {
-        loadPortal();
-      } else if ('IntersectionObserver' in window) {
+      if ('IntersectionObserver' in window) {
         var project2 = document.getElementById('project-2') || p;
         var ioPortal = new IntersectionObserver(function(entries){
           entries.forEach(function(entry){
@@ -2846,6 +2844,9 @@ a { color: inherit; }
     }
 
     function warmExternal(url) {
+      // Mobile Safari may start a second document request when the new tab opens.
+      // Let the real navigation own the request instead of warming a hidden copy.
+      if (narrowScreen) return;
       prefetchDemo(url);
       // Hidden iframe only on user intent; helps demo-new-tab open faster without blocking initial page.
       if (document.querySelector('iframe[data-warm-url="' + url + '"]')) return;
@@ -2859,6 +2860,7 @@ a { color: inherit; }
 
     // Prefetch only after the initial page and critical resources have settled.
     function prefetchExternalDemosLater(){
+      if (narrowScreen) return;
       var idle = window.requestIdleCallback || function(cb){ return setTimeout(cb, 1600); };
       idle(function(){
         prefetchDemo(dealsExternal);
