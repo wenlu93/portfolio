@@ -2677,47 +2677,23 @@ a { color: inherit; }
       setTimeout(check, 0);
     }
 
-    function tuneDealImages() {
-      // Same-origin iframe can usually be accessed; if not, fail silently.
-      if (!d || !d.contentDocument) return;
-      try {
-        var imgs = d.contentDocument.querySelectorAll('img');
-        imgs.forEach(function(img){
-          img.loading = 'eager';
-          img.decoding = 'async';
-          try { img.fetchPriority = 'high'; } catch(e) {}
-          if (img.decode) img.decode().catch(function(){});
-        });
-      } catch(e) {}
-    }
-
-    function tuneDealImagesForAWhile() {
-      var count = 0;
-      var timer = setInterval(function(){
-        tuneDealImages();
-        count += 1;
-        if (count >= 14) clearInterval(timer);
-      }, 320);
-    }
-
     function loadDeals(){
       if (!d || d.dataset.loaded === '1') return;
       d.dataset.loaded = '1';
       d.setAttribute('loading', 'eager');
       d.addEventListener('load', function(){
         markLoaded(d);
-        tuneDealImagesForAWhile();
       }, { once:true });
       d.src = dealsUrl;
       watchRenderReady(d, function(doc){
         var root = doc.querySelector('#root');
         return !!(root && root.firstElementChild);
-      }, tuneDealImagesForAWhile);
+      });
     }
 
-    // Prepare Project 3 early on phones; its response is also the new-tab cache.
+    // Start Project 3 shortly before its section is visible.
     if (d) {
-      if (narrowScreen || location.hash === '#project-3') {
+      if (location.hash === '#project-3') {
         loadDeals();
       } else if ('IntersectionObserver' in window) {
         var project3 = document.getElementById('project-3') || d;
@@ -2728,7 +2704,7 @@ a { color: inherit; }
               ioDeals.disconnect();
             }
           });
-        }, { rootMargin: narrowScreen ? '360px 0px' : '1200px 0px' });
+        }, { rootMargin: narrowScreen ? '1000px 0px' : '1200px 0px' });
         ioDeals.observe(project3);
       } else {
         setTimeout(loadDeals, narrowScreen ? 8000 : 2600);
@@ -2775,24 +2751,42 @@ a { color: inherit; }
       p.dataset.loaded = '1';
       p.addEventListener('load', function(){
         markLoaded(p);
-        if (narrowScreen) setTimeout(loadPortal2, 0);
       }, { once:true });
       p.setAttribute('loading', 'eager');
       try { p.fetchPriority = 'high'; } catch(e) {}
       p.src = portalUrl;
       watchRenderReady(p, function(doc){
         return !!doc.querySelector('#page-digest');
-      }, function(){
-        if (narrowScreen) loadPortal2();
       });
-      if (!narrowScreen) loadPortal2();
+      queuePortal2();
     }
 
-    // Prepare Project 2 early on phones; desktop keeps proximity-based loading.
+    var portal2Queued = false;
+    function queuePortal2(){
+      if (!p2 || p2.dataset.loaded === '1' || portal2Queued) return;
+      if (!narrowScreen) {
+        loadPortal2();
+        return;
+      }
+      portal2Queued = true;
+      if ('IntersectionObserver' in window) {
+        var ioPortal2 = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if (entry.isIntersecting) {
+              loadPortal2();
+              ioPortal2.disconnect();
+            }
+          });
+        }, { rootMargin: '600px 0px' });
+        ioPortal2.observe(p2.closest('.frame') || p2);
+      } else {
+        setTimeout(loadPortal2, 1200);
+      }
+    }
+
+    // Load Project 2 when close to the viewport.
     if (p) {
-      if (narrowScreen) {
-        loadPortal();
-      } else if ('IntersectionObserver' in window) {
+      if ('IntersectionObserver' in window) {
         var project2 = document.getElementById('project-2') || p;
         var ioPortal = new IntersectionObserver(function(entries){
           entries.forEach(function(entry){
@@ -2801,10 +2795,17 @@ a { color: inherit; }
               ioPortal.disconnect();
             }
           });
-        }, { rootMargin: '900px 0px' });
+        }, { rootMargin: narrowScreen ? '1400px 0px' : '900px 0px' });
         ioPortal.observe(project2);
       } else {
         setTimeout(loadPortal, 2600);
+      }
+
+      var portalNav = document.querySelector('a.navlink[href="#project-2"]');
+      if (portalNav) {
+        ['pointerenter','focus','touchstart'].forEach(function(evt){
+          portalNav.addEventListener(evt, loadPortal, { once:true, passive:true });
+        });
       }
     }
 
@@ -2827,6 +2828,23 @@ a { color: inherit; }
     var portalOpen = document.querySelector('#project-2 .btns a.btn.primary');
     if (dealsOpen) dealsOpen.href = dealsExternal;
     if (portalOpen) portalOpen.href = portalExternal;
+
+    // Warm only the shared HTML responses; iframe apps start near their sections.
+    function warmSharedDocuments(){
+      if (!narrowScreen || !window.fetch) return;
+      var options = { cache: 'force-cache', priority: 'low' };
+      fetch(portalUrl, options).then(function(){
+        return fetch(dealsUrl, options);
+      }, function(){
+        return fetch(dealsUrl, options);
+      }).catch(function(){});
+    }
+    function scheduleSharedWarm(){ setTimeout(warmSharedDocuments, 500); }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', scheduleSharedWarm, { once:true });
+    } else {
+      scheduleSharedWarm();
+    }
   })();
 </script>
 <script>
