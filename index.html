@@ -5,9 +5,6 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>个人作品集 · Vibe Coding Works</title>
 <link href="data:," rel="icon"/>
-<link as="image" fetchpriority="high" href="assets/images/mobile/kbfig-asset-05.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
-<link as="image" fetchpriority="high" href="assets/images/mobile/kbfig-asset-07.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
-<link as="image" fetchpriority="high" href="assets/images/mobile/kbfig-asset-06.webp?v=portfolio-images-20260725" media="(max-width: 700px)" rel="preload" type="image/webp"/>
 <script>if(window.matchMedia&&window.matchMedia('(max-width:700px)').matches){document.documentElement.classList.add('mobile-fast-fonts');window.addEventListener('load',function(){setTimeout(function(){document.documentElement.classList.remove('mobile-fast-fonts')},12000)},{once:true})}</script>
 <style>@media(max-width:700px){html.mobile-fast-fonts{--font-display:system-ui,sans-serif!important;--font-body:system-ui,sans-serif!important;--font-mono:ui-monospace,monospace!important}}</style>
 <style>/* cyrillic-ext */
@@ -2637,15 +2634,15 @@ a { color: inherit; }
     var portalExternal = 'https://wenlu93.github.io/campaign-info-portal/?v=acf0065';
     var narrowScreen = !!(window.matchMedia && window.matchMedia('(max-width: 700px)').matches);
 
-    // The fourth image is inline. The final three network images are the only
-    // remaining Project 1 downloads on phones, so keep them ahead of the demos.
+    // The fourth image is inline. Start only the final three network images early on phones,
+    // while leaving bandwidth priority to the two interactive demos.
     if (narrowScreen) {
       document.querySelectorAll('#project-1 source[srcset*="portfolio-images-20260725"]').forEach(function(source){
         var img = source.parentElement && source.parentElement.querySelector('img');
         if (!img) return;
         img.loading = 'eager';
         img.decoding = 'async';
-        try { img.fetchPriority = 'high'; } catch(e) {}
+        try { img.fetchPriority = 'auto'; } catch(e) {}
       });
     }
 
@@ -2680,14 +2677,8 @@ a { color: inherit; }
       setTimeout(check, 0);
     }
 
-    var mobileDealsGestureHandler = null;
     function loadDeals(){
       if (!d || d.dataset.loaded === '1') return;
-      if (mobileDealsGestureHandler) {
-        window.removeEventListener('touchstart', mobileDealsGestureHandler);
-        window.removeEventListener('pointerdown', mobileDealsGestureHandler);
-        mobileDealsGestureHandler = null;
-      }
       d.dataset.loaded = '1';
       d.setAttribute('loading', 'eager');
       d.addEventListener('load', function(){
@@ -2700,19 +2691,10 @@ a { color: inherit; }
       });
     }
 
-    // Start Project 3 near its section so it cannot compete with Project 1 images.
+    // Prepare Project 3 early on phones; desktop keeps proximity-based loading.
     if (d) {
-      if (location.hash === '#project-3') {
+      if (narrowScreen || location.hash === '#project-3') {
         loadDeals();
-      } else if (narrowScreen) {
-        var dealsObserveTarget = d.closest('.device-wrap') || d;
-        mobileDealsGestureHandler = function(event){
-          if (event.target && event.target.closest && event.target.closest('a,button,input,select,textarea')) return;
-          var rect = dealsObserveTarget.getBoundingClientRect();
-          if (rect.top < window.innerHeight + 1200 && rect.bottom > 0) loadDeals();
-        };
-        window.addEventListener('touchstart', mobileDealsGestureHandler, { passive:true });
-        window.addEventListener('pointerdown', mobileDealsGestureHandler, { passive:true });
       } else if ('IntersectionObserver' in window) {
         var project3 = document.getElementById('project-3') || d;
         var ioDeals = new IntersectionObserver(function(entries){
@@ -2722,7 +2704,7 @@ a { color: inherit; }
               ioDeals.disconnect();
             }
           });
-        }, { rootMargin: '1200px 0px' });
+        }, { rootMargin: narrowScreen ? '1000px 0px' : '1200px 0px' });
         ioDeals.observe(project3);
       } else {
         setTimeout(loadDeals, narrowScreen ? 8000 : 2600);
@@ -2730,7 +2712,7 @@ a { color: inherit; }
 
       var dealsNav = document.querySelector('a.navlink[href="#project-3"]');
       if (dealsNav) {
-        (narrowScreen ? ['touchstart','click'] : ['pointerenter','focus','touchstart']).forEach(function(evt){
+        ['pointerenter','focus','touchstart'].forEach(function(evt){
           dealsNav.addEventListener(evt, loadDeals, { once:true, passive:true });
         });
       }
@@ -2802,9 +2784,11 @@ a { color: inherit; }
       }
     }
 
-    // Start the first Project 2 demo near its section; the second stays proximity-based.
+    // Prepare the first Project 2 demo early on phones; the second stays proximity-based.
     if (p) {
-      if ('IntersectionObserver' in window) {
+      if (narrowScreen) {
+        loadPortal();
+      } else if ('IntersectionObserver' in window) {
         var project2 = document.getElementById('project-2') || p;
         var ioPortal = new IntersectionObserver(function(entries){
           entries.forEach(function(entry){
@@ -2813,7 +2797,7 @@ a { color: inherit; }
               ioPortal.disconnect();
             }
           });
-        }, { rootMargin: '900px 0px' });
+        }, { rootMargin: narrowScreen ? '1400px 0px' : '900px 0px' });
         ioPortal.observe(project2);
       } else {
         setTimeout(loadPortal, 2600);
@@ -2821,7 +2805,7 @@ a { color: inherit; }
 
       var portalNav = document.querySelector('a.navlink[href="#project-2"]');
       if (portalNav) {
-        (narrowScreen ? ['touchstart','click'] : ['pointerenter','focus','touchstart']).forEach(function(evt){
+        ['pointerenter','focus','touchstart'].forEach(function(evt){
           portalNav.addEventListener(evt, loadPortal, { once:true, passive:true });
         });
       }
@@ -2862,6 +2846,7 @@ a { color: inherit; }
 
     function warmExternal(url) {
       prefetchDemo(url);
+      // Hidden iframe only on user intent; helps demo-new-tab open faster without blocking initial page.
       if (document.querySelector('iframe[data-warm-url="' + url + '"]')) return;
       var f = document.createElement('iframe');
       f.setAttribute('data-warm-url', url);
@@ -2887,18 +2872,13 @@ a { color: inherit; }
       }, { once:true });
     }
 
-    // Preserve the existing desktop hover/focus warm-up. On phones, do not
-    // create a second hidden page immediately before opening the new tab.
-    if (!narrowScreen) {
-      [dealsOpen, portalOpen].forEach(function(a){
-        if (!a) return;
-        var url = a.href;
-        ['pointerenter','focus','touchstart'].forEach(function(evt){
-          a.addEventListener(evt, function(){ warmExternal(url); }, { once:true, passive:true });
-        });
+    [dealsOpen, portalOpen].forEach(function(a){
+      if (!a) return;
+      var url = a.href;
+      ['pointerenter','focus','touchstart'].forEach(function(evt){
+        a.addEventListener(evt, function(){ warmExternal(url); }, { once:true, passive:true });
       });
-    }
-
+    });
   })();
 </script>
 <script>
