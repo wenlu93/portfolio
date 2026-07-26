@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Campaign Platform · Demo</title>
+
+<meta name="robots" content="noindex"><link href="data:," rel="icon"><link rel="stylesheet" href="../assets/campaign.css"><script defer src="../assets/campaign-demo.js"></script></head>
+<body>
+
+<div class="layout">
+  <aside class="side">
+    <a class="active" data-page="digest" onclick="switchPage('digest')" title="Daily Report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      <span class="nav-label">Report</span>
+      <span class="badge nav-badge-soft" id="digestBadge" style="display:none;" title="Today updates"></span>
+    </a>
+    <a data-page="list" onclick="switchPage('list')" title="Campaign">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span class="nav-label">Campaign</span>
+    </a>
+  </aside>
+
+  <main class="main">
+    <!-- ============ Daily Report Page ============ -->
+    <section class="page active" id="page-digest">
+      <div id="digestBody"></div>
+    </section>
+
+<!-- ============ List Page ============ -->
+    <section class="page" id="page-list">
+      <div class="page-card">
+        <div class="page-head page-head-stack">
+          <div class="page-title-stack">
+            <h2>Campaign List</h2>
+            <div class="page-intro campaign-page-intro"><p>This page is used for browsing all campaigns, reviewing each campaign’s change history, and opening its latest full information.</p><ul><li>Click the expand icon to view all change records;</li><li>Click the Campaign Name to open the latest campaign detail.</li></ul></div>
+          </div>
+        </div>
+
+        <div class="filter">
+          <div class="field"><label>Campaign Name:</label><input id="fName" placeholder="" oninput="onListFilterInput()" onkeydown="onListFilterKey(event)" /></div>
+          <div class="field"><label>Theme:</label>
+            <select id="fTheme" data-filter-searchable="true" onchange="onListFilterChange()">
+              <option value="">All</option>
+              <option>US_Airline_campaign</option>
+              <option>HK_HKMO_destination</option>
+              <option>JP_Branding_campaign</option>
+              <option>TH_Branding_campaign</option>
+              <option>Mega Sale</option>
+            </select>
+          </div>
+          <div class="field"><label>Grade:</label>
+            <select id="fGrade" onchange="onListFilterChange()">
+              <option value="">All</option>
+              <option>Tier 1</option>
+              <option>Tier 2</option>
+              <option>Tier 3</option>
+            </select>
+          </div>
+          <div class="field"><label>Campaign Region:</label><div id="listRegionFilter"></div></div>
+          <div class="field"><label>Campaign Status:</label>
+            <select id="fStatus" onchange="onListFilterChange()">
+              <option value="">All</option>
+              <option value="live">Live</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="ended">Ended</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" onclick="onListFilterChange()">Search</button>
+            <button class="btn" onclick="resetFilter()">Reset</button>
+          </div>
+        </div>
+<div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="sticky s-chk"></th>
+                <th class="sticky s-l4">Campaign Name</th>
+                <th>Theme</th>
+                <th>Grade</th>
+                <th>Campaign Region</th>
+                <th>Campaign Status</th>
+                <th>Create Time</th>
+                <th>Update Time</th>
+                <th>Creator</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div id="emptyHint" class="empty" style="display:none;">No campaigns match the filters.</div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+<!-- ============ Campaign Detail Page ============ -->
+    <section class="page" id="page-detail">
+      <div class="page-card">
+        <div class="page-head">
+          <a class="btn btn-link" onclick="switchPage(currentNonDetailPage)" style="padding:0 4px;">&larr; Back</a>
+          <h2 id="dTitle" style="margin-left:6px;">Campaign Detail</h2>
+          <div class="actions">
+            <button class="btn" onclick="downloadDetailExcel()" aria-label="Download as Excel">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><polyline points="6 11 12 17 18 11"/><path d="M4 21h16"/></svg>
+              Download
+            </button>
+          </div>
+        </div>
+        <div class="tabs" id="mainTabs"></div>
+        <div class="locale-bar-sticky" id="localeBar"></div>
+        <div id="dBody" style="padding:16px 24px;"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
